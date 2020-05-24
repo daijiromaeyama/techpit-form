@@ -7,16 +7,15 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem 
+  MenuItem,
+  FormHelperText
 } from "@material-ui/core";
 
 import { RootState } from "../domain/entity/rootState";
 import collegesActions from "../store/colleges/actions";
 import { searchColleges } from "../store/colleges/effects";
-
 import { College as ICollege } from "../domain/entity/college";
 import profileActions from "../store/profile/actions";
-
 import { PROFILE } from "../domain/services/profile";
 
 import useStyles from "./styles";
@@ -25,6 +24,7 @@ const College = () => {
   const dispatch = useDispatch();
   const colleges = useSelector((state: RootState) => state.colleges);
   const profile = useSelector((state: RootState) => state.profile);
+  const validation = useSelector((state: RootState) => state.validation);
   const classes = useStyles();
 
   const handleChange = (name: string) => {
@@ -47,6 +47,10 @@ const College = () => {
 
   const currentCollege = colleges.result.filter(
     c => c.name === profile.college.name
+  )[0];
+
+  const currentFaculty = currentCollege?.faculty.filter(
+    f => f.name === profile.college.faculty
   )[0];
 
   return (
@@ -87,41 +91,66 @@ const College = () => {
       )}
       {profile.college.name && (
         <>
-          <TextField
-            className={classes.formField}
-            label={PROFILE.COLLEGE.NAME}
-            fullWidth
-            value={profile.college.name}
-            disabled
-          />
-          <FormControl fullWidth className={classes.formField}>
-            <InputLabel>{PROFILE.COLLEGE.FACULTY}</InputLabel>
+        <TextField
+          className={classes.formField}
+          label={PROFILE.COLLEGE.NAME}
+          fullWidth
+          value={profile.college.name}
+          disabled
+        />
+        <FormControl
+          error={!!validation.message.college.faculty}
+          fullWidth
+          className={classes.formField}
+        >
+          <InputLabel>{PROFILE.COLLEGE.FACULTY}</InputLabel>
+          <Select
+            value={profile.college.faculty}
+            onChange={e =>
+              handleCollegeChange({
+                faculty: e.target.value as string,
+                // 学科はリセットしないとwarnning
+                department: ""
+              })
+            }
+          >
+            {currentCollege?.faculty.map(f => (
+              <MenuItem key={f.name} value={f.name}>
+                {f.name}
+              </MenuItem>
+            ))}
+          </Select>
+          <FormHelperText>
+            {validation.message.college.faculty}
+          </FormHelperText>
+        </FormControl>
+        {currentFaculty?.department.length > 0 && (
+          <FormControl required fullWidth className={classes.formField}>
+            <InputLabel>{PROFILE.COLLEGE.DEPARTMENT}</InputLabel>
             <Select
-              value={profile.college.faculty}
+              value={profile.college.department}
               onChange={e =>
-                handleCollegeChange({
-                  faculty: e.target.value as string,
-                  department: ""
-                })
+                handleCollegeChange({ department: e.target.value as string })
               }
             >
-              {currentCollege.faculty.map(f => (
-                <MenuItem key={f.name} value={f.name}>
-                  {f.name}
+              {currentFaculty.department.map(d => (
+                <MenuItem key={d} value={d}>
+                  {d}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          <Button
-            fullWidth
-            className={classes.button}
-            onClick={handleReset}
-            variant="outlined"
-            color="secondary"
-          >
-            学歴の入力情報をリセット
-          </Button>
-        </>
+        )}
+        <Button
+          fullWidth
+          className={classes.button}
+          onClick={handleReset}
+          variant="outlined"
+          color="secondary"
+        >
+          学歴の入力情報をリセット
+        </Button>
+      </>
       )}
     </>
   );
