@@ -18,6 +18,8 @@ import { PROFILE } from "../domain/services/profile";
 import { Gender } from "../domain/entity/gender";
 import profileActions from "../store/profile/actions";
 
+import { calculateValidation } from "../domain/services/validation";
+import validationActions from "../store/validation/actions";
 
 const Basic = () => {
   const classes = useStyles();
@@ -28,6 +30,19 @@ const Basic = () => {
 
   const handleChange = (member: Partial<Profile>) => {
     dispatch(profileActions.setProfile(member));
+    recalculateValidation(member);
+  };
+
+  const recalculateValidation = (member: Partial<Profile>) => {
+    // バリデーションのエラーを表示し始めてたらメッセージを計算して更新
+    if (!validation.isStartValidation) return;
+
+    const newProfile = {
+      ...profile,
+      ...member
+    };
+    const message = calculateValidation(newProfile);
+    dispatch(validationActions.setValidation(message));
   };
 
   return (
