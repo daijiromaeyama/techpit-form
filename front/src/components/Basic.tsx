@@ -6,7 +6,8 @@ import {
   FormLabel,
   RadioGroup,
   FormControlLabel,
-  Radio
+  Radio,
+  FormHelperText
 } from "@material-ui/core";
 
 import useStyles from "./styles";
@@ -23,6 +24,7 @@ const Basic = () => {
 
   const dispatch = useDispatch();
   const profile = useSelector((state: RootState) => state.profile);
+  const validation = useSelector((state: RootState) => state.validation);
 
   const handleChange = (member: Partial<Profile>) => {
     dispatch(profileActions.setProfile(member));
@@ -33,6 +35,9 @@ const Basic = () => {
       <TextField
         fullWidth
         label={PROFILE.NAME}
+        required
+        error={!!validation.message.name}
+        helperText={validation.message.name}
         className={classes.formField}
         value={profile.name}
         onChange={e => handleChange({ name: e.target.value })}
@@ -40,16 +45,21 @@ const Basic = () => {
       <TextField
         fullWidth
         multiline
+        error={!!validation.message.description}
+        helperText={validation.message.description}
         className={classes.formField}
         rows={5}
         label={PROFILE.DESCRIPTION}
         value={profile.description}
         onChange={e => handleChange({ description: e.target.value })}
       />
-      <FormControl className={classes.formField}>
+      <FormControl
+        error={!!validation.message.gender}
+        required
+        className={classes.formField}
+      >
         <FormLabel>{PROFILE.GENDER}</FormLabel>
         <RadioGroup
-          value={profile.gender}
           onChange={e => handleChange({ gender: e.target.value as Gender })}
         >
           <FormControlLabel
@@ -63,9 +73,13 @@ const Basic = () => {
             control={<Radio color="primary" />}
           />
         </RadioGroup>
+        <FormHelperText>{validation.message.gender}</FormHelperText>
       </FormControl>
       <TextField
         fullWidth
+        required
+        error={!!validation.message.birthday}
+        helperText={validation.message.birthday}
         className={classes.formField}
         label={PROFILE.BIRTHDAY}
         type="date"

@@ -12,7 +12,7 @@ export const PROFILE = {
   CAREERS: {
     COMPANY: "会社名",
     POSITION: "役職",
-    SPAN: "期間"
+    SPAN: "期間",
   },
   COLLEGE: {
     NAME: "大学名",
